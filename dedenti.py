@@ -13,7 +13,6 @@ from PIL import Image
 
 
 reader = easyocr.Reader(['en'])
-#executor메모리 바꿀생각도 하기 캐시 안하면 무리는 안가는듯
 spark = SparkSession.builder.appName("dedenti").getOrCreate()
 
 def predict(test):  # test가 받아올 데이터, train가 학습시킬 기존 데이터
@@ -29,7 +28,7 @@ def predict(test):  # test가 받아올 데이터, train가 학습시킬 기존 
 
   test_data_spark = spark.createDataFrame(test, ['feature'])
   
-  saved_model = PipelineModel.load('/Users/choismn/Desktop/model_registry')
+  saved_model = PipelineModel.load('로컬경로/model_registry')
   prediction = saved_model.transform(test_data_spark)
   preds = prediction.filter(col("prediction") == 1).select("feature", "prediction")
   preds.show()
@@ -45,7 +44,7 @@ def read_image_from_s3(filename):
     response = object.get()
     file_stream = response['Body']
     img = Image.open(file_stream)
-    img.save("/Users/choismn/Desktop/test_sparkmodel/before/{}".format(filename), 'jpeg')
+    img.save("로컬경로/before/{}".format(filename), 'jpeg')
     return img
 
 s3 = boto3.resource('s3')
@@ -148,11 +147,11 @@ for path in file_paths_list:
     img[left_upper[1]:right_lower[1], left_upper[0]:right_lower[0]] = blurred_roi
 
   ##이미지저장##
-  cv2.imwrite("after/{}_{}_{}.jpeg".format(part, s, a), img)
+  cv2.imwrite("로컬경로/after/{}_{}_{}.jpeg".format(part, s, a), img)
 
   #afterprocess s3에 저장. 
   s3 = boto3.client('s3')
-  file_name = "after/{}_{}_{}.jpeg".format(part, s, a)
+  file_name = "로컬경로/after/{}_{}_{}.jpeg".format(part, s, a)
   bucket = 'afterprocess'
   key = "{}_{}_{}.jpeg".format(part, s, a)
 
